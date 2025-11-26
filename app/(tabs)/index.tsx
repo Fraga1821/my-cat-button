@@ -7,12 +7,12 @@ import {
   Card,
   Dialog,
   IconButton,
-  Paragraph,
   Portal,
+  Text,
   TextInput
 } from "react-native-paper";
 
-import type Pet from "../../types/Pet"; // adjust path if your project layout differs
+import type Pet from "@/types/Pet";
 
 const STORAGE_KEY = "@mycatbutton_pets";
 
@@ -21,7 +21,7 @@ export default function Pets() {
   const [loading, setLoading] = useState<boolean>(true);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [detailsVisible, setDetailsVisible] = useState(false);
-  const [current, setCurrent] = useState<Partial<Pet> | null>(null); // used for add/edit/detail
+  const [current, setCurrent] = useState<Partial<Pet> | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -37,17 +37,17 @@ export default function Pets() {
         const data: Pet[] = JSON.parse(raw);
         setPets(data);
       } else {
-        // initial sample data if nothing stored yet
+        // Exemplos iniciais
         const data: Pet[] = [
-          { nome: "Whiskers", idade: 3, peso: 4.2, descricao: "Playful Siamese" },
-          { nome: "Mittens", idade: 2, peso: 3.8, descricao: "Calm tabby" }
+          { nome: "Luke", idade: 3, peso: 4.2, descricao: "Gatinho mordedor de pé" },
+          { nome: "Lilly", idade: 3, peso: 3.8, descricao: "Brrrrrr" }
         ];
         setPets(data);
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       }
     } catch (e) {
-      console.error("Failed to load pets from storage", e);
-      Alert.alert("Error", "Could not load pets.");
+      console.error("Erro ao ler pets.", e);
+      Alert.alert("Erro", "Não foi possível ler pets.");
     } finally {
       setLoading(false);
     }
@@ -57,9 +57,8 @@ export default function Pets() {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newPets));
     } catch (e) {
-      console.error("Failed to save pets to storage", e);
-      // Not blocking UI, but inform the user
-      Alert.alert("Error", "Could not persist pets.");
+      console.error("Falha ao persistir pets.", e);
+      Alert.alert("Erro", "Não foi possível salvar pets.");
     }
   }
 
@@ -81,10 +80,10 @@ export default function Pets() {
   }
 
   async function handleDelete(index: number) {
-    Alert.alert("Delete pet", "Are you sure you want to delete this pet?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert("Remover pet", "Você tem certeza que gostaria de remover esse pet da lista?", [
+      { text: "Cancelar", style: "cancel" },
       {
-        text: "Delete",
+        text: "Remover",
         style: "destructive",
         onPress: async () => {
           try {
@@ -92,8 +91,8 @@ export default function Pets() {
             setPets(newPets);
             await persistPets(newPets);
           } catch (e) {
-            console.error("Delete failed", e);
-            Alert.alert("Error", "Failed to delete pet.");
+            console.error("Erro ao remover pet.", e);
+            Alert.alert("Erro", "Erro ao remover pet da lista.");
           }
         },
       },
@@ -104,19 +103,17 @@ export default function Pets() {
     if (!current) return;
     const { nome, idade = 0, peso = 0, descricao } = current as Pet;
     if (!nome) {
-      Alert.alert("Validation", "Please provide a name.");
+      Alert.alert("Nome obrigatório", "Por favor, insira o nome do pet.");
       return;
     }
     try {
       setSaving(true);
       if (currentIndex !== null) {
-        // update
         const updated: Pet = { nome, idade, peso, descricao: descricao || "" };
         const newPets = pets.map((p, i) => (i === currentIndex ? updated : p));
         setPets(newPets);
         await persistPets(newPets);
       } else {
-        // create
         const created: Pet = { nome, idade, peso, descricao: descricao || "" };
         const newPets = [created, ...pets];
         setPets(newPets);
@@ -126,8 +123,8 @@ export default function Pets() {
       setCurrent(null);
       setCurrentIndex(null);
     } catch (e) {
-      console.error("Save failed", e);
-      Alert.alert("Error", "Failed to save pet.");
+      console.error("Falha ao salvar estado do pet.", e);
+      Alert.alert("Erro", "Falha ao salvar estado do pet.");
     } finally {
       setSaving(false);
     }
@@ -150,7 +147,7 @@ export default function Pets() {
           <Card style={styles.card}>
             <Card.Title
               title={item.nome}
-              subtitle={`${item.idade} yrs • ${item.peso} kg`}
+              subtitle={`${item.idade} anos • ${item.peso} kg`}
               right={() => (
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                   <IconButton
@@ -166,32 +163,30 @@ export default function Pets() {
               )}
             />
             <Card.Content>
-              <Paragraph>{item.descricao || "No description."}</Paragraph>
+              <Text variant="bodyMedium">{item.descricao || "Sem descrição."}</Text>
             </Card.Content>
           </Card>
         )}
         contentContainerStyle={{ padding: 8 }}
         ListEmptyComponent={
           <View style={styles.center}>
-            <Paragraph>No pets found. Add one using the button below.</Paragraph>
+            <Text variant="bodyMedium" style={styles.backgroundText}>Nenhum pet encontrado.</Text>
           </View>
         }
       />
 
-      {/* Primary button to add more pets */}
       <Button
         mode="contained"
         onPress={() => openEdit()}
         style={styles.addButton}
         uppercase={false}
       >
-        Add pet
+        Adicionar um gatinho
       </Button>
 
-      {/* Add / Edit Dialog */}
       <Portal>
         <Dialog visible={dialogVisible} onDismiss={() => setDialogVisible(false)}>
-          <Dialog.Title>{currentIndex !== null ? "Edit pet" : "Add pet"}</Dialog.Title>
+          <Dialog.Title>{currentIndex !== null ? "Atualizar gatinho" : "Adicionar gatinho"}</Dialog.Title>
           <Dialog.Content>
             <TextInput
               label="Nome"
@@ -200,7 +195,7 @@ export default function Pets() {
               style={{ marginBottom: 8 }}
             />
             <TextInput
-              label="Idade"
+              label="Idade (anos)"
               keyboardType="numeric"
               value={
                 current && typeof current.idade === "number"
@@ -213,7 +208,7 @@ export default function Pets() {
               style={{ marginBottom: 8 }}
             />
             <TextInput
-              label="Peso"
+              label="Peso (kg)"
               keyboardType="numeric"
               value={
                 current && typeof current.peso === "number" ? String(current.peso) : ""
@@ -230,25 +225,25 @@ export default function Pets() {
             />
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setDialogVisible(false)}>Cancel</Button>
+            <Button onPress={() => setDialogVisible(false)}>Cancelar</Button>
             <Button loading={saving} onPress={savePet}>
-              Save
+              Salvar
             </Button>
           </Dialog.Actions>
         </Dialog>
 
         {/* Details Dialog */}
         <Dialog visible={detailsVisible} onDismiss={() => setDetailsVisible(false)}>
-          <Dialog.Title>Pet details</Dialog.Title>
+          <Dialog.Title>Detalhes do gatinho</Dialog.Title>
           <Dialog.Content>
-            <Paragraph>Nome: {(current as Pet)?.nome}</Paragraph>
-            <Paragraph>Idade: {(current as Pet)?.idade} anos</Paragraph>
-            <Paragraph>Peso: {(current as Pet)?.peso} kg</Paragraph>
-            <Paragraph>Descrição: {(current as Pet)?.descricao}</Paragraph>
+            <Text variant="bodyMedium">Nome: {(current as Pet)?.nome}</Text>
+            <Text variant="bodyMedium">Idade: {(current as Pet)?.idade} anos</Text>
+            <Text variant="bodyMedium">Peso: {(current as Pet)?.peso} kg</Text>
+            <Text variant="bodyMedium">Descrição: {(current as Pet)?.descricao}</Text>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setDetailsVisible(false)}>Close</Button>
-            <Button onPress={() => { setDetailsVisible(false); openEdit(current as Pet, currentIndex ?? undefined); }}>Edit</Button>
+            <Button onPress={() => setDetailsVisible(false)}>Fechar</Button>
+            <Button onPress={() => { setDetailsVisible(false); openEdit(current as Pet, currentIndex ?? undefined); }}>Alterar</Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
@@ -265,4 +260,5 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   header: { margin: 12 },
+  backgroundText: { color: "black" },
 });

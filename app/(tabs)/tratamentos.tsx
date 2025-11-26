@@ -7,8 +7,8 @@ import {
   Card,
   Dialog,
   IconButton,
-  Paragraph,
   Portal,
+  Text,
   TextInput
 } from "react-native-paper";
 
@@ -37,6 +37,7 @@ export default function Tratamentos() {
         const data: Tratamento[] = JSON.parse(raw);
         setTratamentos(data);
       } else {
+        // Exemplos iniciais
         const data: Tratamento[] = [
           { nome: "Antibiótico", nomeRemedio: "Amoxicilina", descricao: "Para infecção", dataInicio: "2024-01-01", dataFim: "2024-01-10" },
           { nome: "Alergia", nomeRemedio: "Cetirizina", descricao: "Para coceira", dataInicio: "2024-01-05", dataFim: "2024-02-05" }
@@ -45,8 +46,8 @@ export default function Tratamentos() {
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       }
     } catch (e) {
-      console.error("Failed to load tratamentos", e);
-      Alert.alert("Error", "Could not load tratamentos.");
+      console.error("Falha ao carregar tratamentos", e);
+      Alert.alert("Erro", "Não foi possível carregar tratamentos.");
     } finally {
       setLoading(false);
     }
@@ -56,8 +57,8 @@ export default function Tratamentos() {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newList));
     } catch (e) {
-      console.error("Failed to persist tratamentos", e);
-      Alert.alert("Error", "Could not persist tratamentos.");
+      console.error("Falha ao persistir tratamentos", e);
+      Alert.alert("Erro", "Não foi possível persistir tratamentos.");
     }
   }
 
@@ -79,10 +80,10 @@ export default function Tratamentos() {
   }
 
   async function handleDelete(index: number) {
-    Alert.alert("Delete tratamento", "Are you sure you want to delete this tratamento?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert("Remover tratamento", "Você tem certeza que gostaria de remover o tratamento?", [
+      { text: "Cancelar", style: "cancel" },
       {
-        text: "Delete",
+        text: "Remover",
         style: "destructive",
         onPress: async () => {
           try {
@@ -90,8 +91,8 @@ export default function Tratamentos() {
             setTratamentos(newTratamentos);
             await persistTratamentos(newTratamentos);
           } catch (e) {
-            console.error("Delete failed", e);
-            Alert.alert("Error", "Failed to delete tratamento.");
+            console.error("Falha ao remover tratamento", e);
+            Alert.alert("Erro", "Falha ao remover tratamento.");
           }
         },
       },
@@ -102,7 +103,7 @@ export default function Tratamentos() {
     if (!current) return;
     const { nome, nomeRemedio, descricao, dataInicio, dataFim } = current as Tratamento;
     if (!nome || !nomeRemedio) {
-      Alert.alert("Validation", "Please provide a name and medicine name.");
+      Alert.alert("Nome obrigatório", "Por favor, insira o nome do tratamento e do remédio.");
       return;
     }
     try {
@@ -121,8 +122,8 @@ export default function Tratamentos() {
       setCurrent(null);
       setCurrentIndex(null);
     } catch (e) {
-      console.error("Save failed", e);
-      Alert.alert("Error", "Failed to save tratamento.");
+      console.error("Falha ao salvar tratamento", e);
+      Alert.alert("Erro", "Falha ao salvar tratamento.");
     } finally {
       setSaving(false);
     }
@@ -161,14 +162,14 @@ export default function Tratamentos() {
               )}
             />
             <Card.Content>
-              <Paragraph>{item.descricao || "No description."}</Paragraph>
+              <Text variant="bodyMedium">{item.descricao || "Sem descrição"}</Text>
             </Card.Content>
           </Card>
         )}
         contentContainerStyle={{ padding: 8 }}
         ListEmptyComponent={
           <View style={styles.center}>
-            <Paragraph>No tratamentos found. Add one using the button below.</Paragraph>
+            <Text variant="bodyMedium" style={styles.backgroundText}>Não foram encontrados tratamentos registrados.</Text>
           </View>
         }
       />
@@ -179,12 +180,12 @@ export default function Tratamentos() {
         style={styles.addButton}
         uppercase={false}
       >
-        Add tratamento
+        Adicionar tratamento
       </Button>
 
       <Portal>
         <Dialog visible={dialogVisible} onDismiss={() => setDialogVisible(false)}>
-          <Dialog.Title>{currentIndex !== null ? "Edit tratamento" : "Add tratamento"}</Dialog.Title>
+          <Dialog.Title>{currentIndex !== null ? "Alterar tratamento" : "Adicionar tratamento"}</Dialog.Title>
           <Dialog.Content>
             <TextInput
               label="Nome"
@@ -217,25 +218,25 @@ export default function Tratamentos() {
             />
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setDialogVisible(false)}>Cancel</Button>
+            <Button onPress={() => setDialogVisible(false)}>Cancelar</Button>
             <Button loading={saving} onPress={saveTratamento}>
-              Save
+              Salvar
             </Button>
           </Dialog.Actions>
         </Dialog>
 
         <Dialog visible={detailsVisible} onDismiss={() => setDetailsVisible(false)}>
-          <Dialog.Title>Tratamento details</Dialog.Title>
+          <Dialog.Title>Detalhes do tratamento</Dialog.Title>
           <Dialog.Content>
-            <Paragraph>Nome: {(current as Tratamento)?.nome}</Paragraph>
-            <Paragraph>Remédio: {(current as Tratamento)?.nomeRemedio}</Paragraph>
-            <Paragraph>Descrição: {(current as Tratamento)?.descricao}</Paragraph>
-            <Paragraph>Data Início: {(current as Tratamento)?.dataInicio}</Paragraph>
-            <Paragraph>Data Fim: {(current as Tratamento)?.dataFim}</Paragraph>
+            <Text variant="bodyMedium">Nome: {(current as Tratamento)?.nome}</Text>
+            <Text variant="bodyMedium">Remédio: {(current as Tratamento)?.nomeRemedio}</Text>
+            <Text variant="bodyMedium">Descrição: {(current as Tratamento)?.descricao}</Text>
+            <Text variant="bodyMedium">Data Início: {(current as Tratamento)?.dataInicio}</Text>
+            <Text variant="bodyMedium">Data Fim: {(current as Tratamento)?.dataFim}</Text>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setDetailsVisible(false)}>Close</Button>
-            <Button onPress={() => { setDetailsVisible(false); openEdit(current as Tratamento, currentIndex ?? undefined); }}>Edit</Button>
+            <Button onPress={() => setDetailsVisible(false)}>Fechar</Button>
+            <Button onPress={() => { setDetailsVisible(false); openEdit(current as Tratamento, currentIndex ?? undefined); }}>Alterar</Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
@@ -251,4 +252,5 @@ const styles = StyleSheet.create({
     margin: 12,
     borderRadius: 4,
   },
+  backgroundText: { color: "black" },
 });
